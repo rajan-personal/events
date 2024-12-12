@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function AboutPage() {
   return (
@@ -12,16 +13,16 @@ export default function AboutPage() {
           </p>
           <p className="mb-4">
             Our platform makes it easy to discover and participate in events that matter
-            to you, whether they're professional conferences, social gatherings, or
+            to you, whether they&apos;re professional conferences, social gatherings, or
             educational workshops.
           </p>
           <div className="mt-6">
-            <a
+            <Link
               href="/"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>
