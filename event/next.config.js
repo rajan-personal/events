@@ -5,6 +5,8 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: '/events',
+  trailingSlash: true,
+  distDir: 'dist',
 }
 
 module.exports = nextConfig

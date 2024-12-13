@@ -28,19 +28,22 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './event/package-lock.json'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
       - name: Install dependencies
-        run: cd event && npm ci
+        run: |
+          cd event
+          npm ci
         
       - name: Build with Next.js
-        run: cd event && npm run build
+        run: |
+          cd event
+          npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /events
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./event/out
+          path: ./event/dist
 
   deploy:
     environment:
