@@ -29,9 +29,9 @@ export default function EditEvent() {
         const formattedDate = new Date(eventData.date).toISOString().split('T')[0];
         setFormData({
           title: eventData.title,
-          description: eventData.description,
+          description: eventData.description || '',
           date: formattedDate,
-          location: eventData.location
+          location: eventData.location || ''
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load event');
