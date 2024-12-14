@@ -1,25 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { eventsService } from '../lib/events';
+import { useEvents } from '../contexts/EventsContext';
 
 export default function CreateEvent() {
   const navigate = useNavigate();
+  const { refreshEvents } = useEvents();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: '',
     location: '',
-    category: 'Technology',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this data to your backend
-    console.log('Form submitted:', formData);
-    // Navigate back to the events list
-    navigate('/');
+    setLoading(true);
+    setError(null);
+
+    try {
+      await eventsService.createEvent({
+        ...formData,
+        date: new Date(formData.date),
+      });
+      await refreshEvents();
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create event');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -31,6 +46,12 @@ export default function CreateEvent() {
     <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Event</h1>
       
+      {error && (
+        <div className="mb-4 bg-red-50 text-red-600 p-4 rounded-md">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow-md rounded-lg p-6">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
@@ -54,8 +75,7 @@ export default function CreateEvent() {
           <textarea
             id="description"
             name="description"
-            rows={4}
-            required
+            rows={3}
             value={formData.description}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -64,10 +84,10 @@ export default function CreateEvent() {
 
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-            Date
+            Date and Time
           </label>
           <input
-            type="date"
+            type="datetime-local"
             id="date"
             name="date"
             required
@@ -85,45 +105,19 @@ export default function CreateEvent() {
             type="text"
             id="location"
             name="location"
-            required
             value={formData.location}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="Technology">Technology</option>
-            <option value="Music">Music</option>
-            <option value="Art">Art</option>
-            <option value="Business">Business</option>
-            <option value="Sports">Sports</option>
-          </select>
-        </div>
-
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Cancel
-          </button>
+        <div className="flex justify-end">
           <button
             type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={loading}
+            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            Create Event
+            {loading ? 'Creating...' : 'Create Event'}
           </button>
         </div>
       </form>
